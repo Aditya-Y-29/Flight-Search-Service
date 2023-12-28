@@ -2,8 +2,8 @@ const CrudRepository = require('./crud-repository');
 const {Flight,Airplane,Airport,City} = require('../models');
 const { Op } = require('sequelize');
 const {Sequelize}=require('sequelize');
-const { on } = require('nodemon');
-
+const {addRowLockOnFlights}=require('./queries')
+const db=require('../models')
 class FlightRepository extends CrudRepository{
     constructor(){
         super(Flight)
@@ -44,6 +44,26 @@ class FlightRepository extends CrudRepository{
             ]
         })
         return response
+    }
+
+    async updateRemainingSeats(flightId,seats,dec=true){
+        const transaction = await db.sequelize.transaction();
+        try {
+            await db.sequelize.query(addRowLockOnFlights(flightId))
+            const flight= await Flight.findByPk(flightId)
+            if(+dec){
+                await flight.decrement('totalSeats',{by: seats},{transaction,transaction});
+            }
+            else{
+                await flight.increment('totalSeats',{by: seats},{transaction:transaction});
+            }
+            await flight.reload()
+            await transaction.commit()
+            return flight;
+        } catch (error) {
+            await transaction.rollback()
+            throw error
+        }
     }
     
 }

@@ -74,7 +74,19 @@ function validateFlightTiming(req,res,next){
     next()
 }
 
+function validateRemainingSeatRequest(req,res,next){
+    if(!req.body.seats){
+        ErrorResponse.message="Something went wrong when updating remaining seats"
+        ErrorResponse.error= new AppError(["seats not found in incoming request"],StatusCodes.BAD_REQUEST);
+        return res
+                .status(StatusCodes.BAD_REQUEST).
+                json(ErrorResponse)
+    }
+    next()
+}
+
 module.exports={
     validateCreateRequest,
-    validateFlightTiming
+    validateFlightTiming,
+    validateRemainingSeatRequest
 }

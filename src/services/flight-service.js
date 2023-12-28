@@ -79,9 +79,19 @@ async function getFlight(data){
     }
 }
 
+async function updateSeats(data){
+    try {
+        const response = await flightRepository.updateRemainingSeats(data.flightId,data.seats,data.dec);
+        return response;
+    } catch (error) {
+        console.log(error)
+        throw new AppError('Error in fetching airplanes',StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
 
 module.exports={
     createFlight,
     getAllFlights,
-    getFlight
+    getFlight,
+    updateSeats
 }
